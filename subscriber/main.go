@@ -74,39 +74,41 @@ type Order struct {
 
 func errHandle(err error) {
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 
-func getter(w http.ResponseWriter, r *http.Request) {
+func getOrderByID(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request")
 	if r.Method == "POST" {
 		io.WriteString(w, "test")
 		reqBody, err := ioutil.ReadAll(r.Body)
-		fmt.Println(string(reqBody))
 		errHandle(err)
+		fmt.Println(string(reqBody))
 		response, err := json.Marshal(cash[string(reqBody)])
-		io.WriteString(w, string(response))
+		errHandle(err)
+		_, err = io.WriteString(w, string(response))
+		errHandle(err)
 	}
 	if r.Method == "GET" {
-		io.WriteString(w, "Hello! You can get order info in .json format. To get it,\n"+
+		_, err := io.WriteString(w, "Hello! You can get order info in .json format. To get it,\n"+
 			"send POST request with desired order_uid in request body.")
+		errHandle(err)
 	}
 }
 
-// connecting to Postgres db
 func init() {
 	var err error
 
+	// connecting to Postgres db
 	connStr := "postgres://wb_intern:1029@localhost/wb_intern?sslmode=disable" //TODO: learn some way to NOT hardcode passwords
 	db, err = sql.Open("postgres", connStr)
 	errHandle(err)
-
 	err = db.Ping()
 	errHandle(err)
-
 	fmt.Println("Successfully connected to Postgres")
 
+	//loading orders from db to memory
 	rows, err := db.Query(`SELECT * FROM "order"`)
 	errHandle(err)
 	defer rows.Close()
@@ -150,12 +152,8 @@ func main() {
 		}
 	}
 
-	Sc.Subscribe("foo", dealWithMsg)
-	http.HandleFunc("/", getter)
+	Sc.Subscribe("JSON_channel", dealWithMsg)
+	http.HandleFunc("/", getOrderByID)
 	err := http.ListenAndServe(":3333", nil)
 	errHandle(err)
-
-	var quit string
-	fmt.Scan(&quit)
-	fmt.Println(cash["b563feb7b2b84b6test"].Items[0].Brand)
 }

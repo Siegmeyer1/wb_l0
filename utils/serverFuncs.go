@@ -10,10 +10,9 @@ func ConnectStan(clientID string) stan.Conn {
 	clusterID := "test-cluster"    // nats cluster id
 	url := "nats://127.0.0.1:4222" // nats url
 
-	// you can set client id anything
 	sc, err := stan.Connect(clusterID, clientID, stan.NatsURL(url),
-		stan.Pings(1, 3),
-		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
+		stan.Pings(1, 3), //set how exacly to ping server. In this case we ping once a second, and if 3 pings fail we consider connection lost
+		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) { //what to do if connection is lost
 			log.Fatalf("Connection lost, reason: %v", reason)
 		}))
 	if err != nil {

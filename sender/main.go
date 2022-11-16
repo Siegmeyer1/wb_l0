@@ -20,7 +20,7 @@ func main() {
 		if err != nil {
 			fmt.Printf("Can`t read file %s, error: %s\n", input, err)
 		} else {
-			Sc.Publish("foo", file)
+			Sc.Publish("JSON_channel", file)
 		}
 	}
 }
