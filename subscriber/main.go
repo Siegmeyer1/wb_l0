@@ -78,10 +78,10 @@ func main() {
 
 		var order utils.Order
 
-		if err := decoder.Decode(&order); err != nil { //fill Order var with .json data
-			log.Println(err)
-		}
+		err := decoder.Decode(&order)
 		switch {
+		case err != nil:
+			log.Println(err)
 		case order.Order_uid == "": // here we can add more specifics on how full .json should be
 			log.Println("Data in .json is not full enough")
 
